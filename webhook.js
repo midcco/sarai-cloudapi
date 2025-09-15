@@ -5,17 +5,17 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
-const token = 'EAALhYXnZBJZBQBPesnnuVc3ne0F8kDsUWyHwiN1yOH5LWZAqR9HswOiU3vhRyI3KQAJIvwzPDZBy2TeethWJKjYdxjfKswksPIkskd2TI2gYFZBiKSSVNl2a5ZCYwDgpFT7S0k82epQXpvZA7Qnu4V7lExvmZCmaMZBG4r491usL2minB3RvZCFSBgGFpZAtf2Vb008tc2QQ9oZD';
-const phoneNumberId = '717092608164080';
+const token = process.env.WHATSAPP_TOKEN;
+const phoneNumberId = process.env.PHONE_NUMBER_ID;
 
 // Verificación del webhook (Meta lo usa para confirmar la URL)
 app.get('/webhook', (req, res) => {
-  const verifyToken = 'midcco'; // Este es el que debes poner en Meta
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'midcco'; // Este es el que debes poner en Meta
   const mode = req.query['hub.mode'];
   const receivedToken = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  if (mode === 'subscribe' && receivedToken === verifyToken) {
+  if (mode === 'subscribe' && receivedToken === VERIFY_TOKEN) {
     console.log('✅ Webhook verificado correctamente');
     res.status(200).send(challenge);
   } else {
@@ -87,7 +87,13 @@ if (['hola', 'buenas', 'hello', 'hi'].includes(normalized)) {
   res.sendStatus(200);
 });
 
+// Ruta raíz para Render (evita error "Cannot GET /")
+app.get('/', (_req, res) => {
+  res.status(200).send('SarAI está corriendo');
+});
+
 // Iniciar servidor
-app.listen(3000, () => {
-  console.log('🚀 Webhook escuchando en puerto 3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Webhook escuchando en puerto ${PORT}`);
 });
