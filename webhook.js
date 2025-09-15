@@ -10,7 +10,7 @@ const phoneNumberId = process.env.PHONE_NUMBER_ID;
 
 // Verificación del webhook (Meta lo usa para confirmar la URL)
 app.get('/webhook', (req, res) => {
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'midcco'; // Este es el que debes poner en Meta
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'midcco';
   const mode = req.query['hub.mode'];
   const receivedToken = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
@@ -33,35 +33,41 @@ app.post('/webhook', async (req, res) => {
   if (message && message.text) {
     const from = message.from;
     const userMessage = message.text.body.trim();
+    const normalized = userMessage.toLowerCase();
 
-let reply = '🤖 No entendí tu mensaje. Por favor escribe un número del 1 al 6.';
+    let reply = '🤖 No entendí tu mensaje. Por favor escribe un número del 1 al 8.';
 
-const normalized = userMessage.toLowerCase();
+    if (['hola', 'buenas', 'hello', 'hi'].includes(normalized)) {
+      reply = `👋 ¡Hola! Bienvenido al Museo Judío de Chile. Soy la asistente virtual SarAI y estoy aquí para ayudarte. Por favor, selecciona una opción escribiendo el número correspondiente.\n\n📌 Recuerda que para visitar el museo debes agendar previamente en 👉 www.museojudio.cl\n\n1. ℹ️ Información general\n2. 🏫 Visitas escolares o institucionales\n3. 🎟️ Visitas particulares\n4. 📅 Estado de tu reserva\n5. 🗣️ Agendar una charla en tu colegio\n6. 🧭 Cómo llegar\n7. 🧳 Conoce nuestros recorridos\n8. 📞 Otras consultas`;
+    } else {
+      switch (userMessage) {
+        case '1':
+          reply = `ℹ️ *Información general*\n\n• Entrada gratuita, previa reserva en www.museojudio.cl\n• Recorridos disponibles: Historia del pueblo judío y Holocausto/Shoá.\n\n🕒 *Horarios:*\n• Lunes a jueves: 10:00 – 16:00 hrs\n• Viernes: 10:00 – 15:00 hrs\n• Sábados: cerrado\n• Domingos: consultar por correo 📩 info@mij.cl\n\n📍 Dirección: Comandante Malbec 13210, Lo Barnechea.\n♿ Accesibilidad: rampa, ascensor y baños adaptados.`;
+          break;
+        case '2':
+          reply = `🏫 *Visitas escolares o institucionales*\n\n• Reservas en www.museojudio.cl\n• Dos recorridos disponibles (Historia del pueblo judío y Holocausto/Shoá).\n• Dirigido a mayores de 14 años.\n• Duración: 2 horas.\n• Capacidad máxima: 45 personas por recorrido.\n• Estacionamiento para buses disponible.`;
+          break;
+        case '3':
+          reply = `🎟️ *Visitas particulares*\n\nLa entrada es gratuita con reserva previa.\n• Grupos de más de 7 personas cuentan con guía gratuito.\n• Para grupos menores, la visita guiada tiene un costo de $35.000 por grupo.\n🙏 Si deseas, puedes apoyar al museo con un aporte voluntario en 👉 museojudio.donando.cl`;
+          break;
+        case '4':
+          reply = `📅 *Estado de tu reserva*\n\nPor favor indícanos el correo con el que realizaste la reserva y te confirmaremos durante nuestros horarios de atención.`;
+          break;
+        case '5':
+          reply = `🗣️ *Agendar una charla en tu colegio*\n\nPara agendar una charla, escríbenos a 📩 info@mij.cl indicando curso, asignatura y objetivos académicos. Así podremos ofrecer una actividad acorde a tus necesidades.`;
+          break;
+        case '6':
+          reply = `🧭 *Cómo llegar*\n\n📍 Dirección: Comandante Malbec 13210, Lo Barnechea.\n🚗 Estacionamiento sin costo.\n🚌 Desde Metro Manquehue: buses N°430 o N°426 hasta la parada Portal la Dehesa, luego caminar a Comandante Malbec.\n🚌 Desde Metro Los Domínicos: bus C16 hasta Padre José Arteaga, luego caminar a Comandante Malbec.`;
+          break;
+        case '7':
+          reply = `🧳 *Conoce nuestros recorridos*\n\n• Historia del pueblo judío\n• Holocausto/Shoá\n\nAmbos disponibles para visitas escolares e institucionales.`;
+          break;
+        case '8':
+          reply = `📞 *Otras consultas*\n\nSi necesitas ayuda personalizada, escríbenos a 📩 info@mij.cl`;
+          break;
+      }
+    }
 
-if (['hola', 'buenas', 'hello', 'hi'].includes(normalized)) {
-  reply = `👋 *WhatsApp MIJ – Asistente Virtual Museo Judío de Chile*\n\n¡Hola! Bienvenido al Museo Judío de Chile. Soy la asistente virtual SarAI y estoy aquí para ayudarte.\n\nPor favor, selecciona una opción escribiendo el número correspondiente:\n\n📌 Recuerda que para visitar el museo debes agendar previamente en 👉 www.museojudio.cl\n\n1. ℹ️ Información general\n2. 🎟️ Entradas y reservas\n3. 📅 Estado de tu reserva\n4. 🏫 Visitas escolares o institucionales\n5. 🧭 Cómo llegar\n6. 📞 Otras consultas`;
-} else {
-  switch (userMessage) {
-    case '1':
-      reply = `ℹ️ *Información general*\n\n• Entrada gratuita, previa reserva en www.museojudio.cl\n• Grupos de más de 7 personas cuentan con guía gratuito. Para grupos menores, la visita guiada tiene un costo de $35.000 por grupo.\n• Recorridos disponibles: Historia del pueblo judío y memoria del Holocausto.\n\n🕒 *Horarios:*\n• Lunes a jueves: 10:00 – 16:00 hrs\n• Viernes: 10:00 – 15:00 hrs\n• Sábados: cerrado\n• Domingos: atención solo vía correo 📩 info@mij.cl\n\n📍 Dirección: Comandante Malbec 13210, Lo Barnechea.\n♿ Accesibilidad: rampa, ascensor y baños adaptados.`;
-      break;
-    case '2':
-      reply = `🎟️ *Entradas y reservas*\n\nLa entrada es gratuita con reserva previa.\n🙏 Si deseas, puedes apoyar al museo con un aporte voluntario en 👉 museojudio.donando.cl`;
-      break;
-    case '3':
-      reply = `📅 *Estado de tu reserva*\n\nPor favor indícanos el correo con el que realizaste la reserva y te confirmaremos en nuestro horario de atención.`;
-      break;
-    case '4':
-      reply = `🏫 *Visitas escolares o institucionales*\n\n• Reservas en www.museojudio.cl\n• Dos recorridos disponibles: Historia del pueblo judío y memoria del Holocausto.\n• Dirigido a mayores de 14 años.\n• Duración: 2 horas.\n• Capacidad: 45 personas por recorrido.\n• Estacionamiento para buses disponible.`;
-      break;
-    case '5':
-      reply = `🧭 *Cómo llegar*\n\n📍 Dirección: Comandante Malbec 13210, Lo Barnechea.\n🚗 Estacionamiento sin costo.\n🚌 Desde Metro Manquehue: buses N°430 o N°426 hasta Mall Portal la Dehesa, luego caminar a Comandante Malbec.\n🚌 Desde Metro Los Domínicos: bus C16 hasta Padre José Arteaga, luego caminar a Comandante Malbec.`;
-      break;
-    case '6':
-      reply = `📞 *Otras consultas*\n\nSi necesitas ayuda personalizada, escríbenos a 📩 info@mij.cl`;
-      break;
-  }
-}
     try {
       await axios.post(
         `https://graph.facebook.com/v19.0/${phoneNumberId}/messages`,
